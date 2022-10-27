@@ -7,7 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class App {
+public class App{
     public static void main(String[] args) {
         try {
             // get URL content
