@@ -64,7 +64,6 @@ public class Server {
 
     private final OpcUaServer server;
     private final Namespace namespace;
-    private final DeviceCreator deviceCreator;
 
 
     public Server() throws Exception {
@@ -87,7 +86,6 @@ public class Server {
 
         server = new OpcUaServer(serverConfig);
         namespace = new Namespace(server);
-        deviceCreator = new DeviceCreator(server);
         namespace.startup();
     }
 
@@ -122,7 +120,6 @@ public class Server {
 
     public CompletableFuture<OpcUaServer> shutdown() {
         namespace.shutdown();
-        deviceCreator.shutdown();
 
 
         return server.shutdown();
