@@ -60,6 +60,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
     private final DataTypeDictionaryManager dictionaryManager;
 
     private final SubscriptionModel subscriptionModel;
+    private final DeviceCreator deviceCreator = new DeviceCreator(getServer());
 
     Namespace(OpcUaServer server) {
         super(server, NAMESPACE_URI);
@@ -170,7 +171,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
     private void addVariableNodes(UaFolderNode rootNode) {
         addStatic(rootNode);
         addDynamic(rootNode);
-        addDevice(rootNode);
+        deviceCreator.addDevice(rootNode);
     }
 
     private void addStatic(UaFolderNode rootNode) {
@@ -247,8 +248,6 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
             dynamicFolder.addOrganizes(node);
         }
     }
-
-
 
 
     @Override
