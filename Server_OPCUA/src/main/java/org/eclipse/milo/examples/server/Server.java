@@ -65,6 +65,7 @@ public class Server {
     private final OpcUaServer server;
     private final Namespace namespace;
 
+
     public Server() throws Exception {
 
         Set<EndpointConfiguration> endpointConfigurations = createEndpointConfigurations();
@@ -84,7 +85,6 @@ public class Server {
             .build();
 
         server = new OpcUaServer(serverConfig);
-
         namespace = new Namespace(server);
         namespace.startup();
     }

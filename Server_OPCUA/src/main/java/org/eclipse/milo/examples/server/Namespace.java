@@ -170,6 +170,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
     private void addVariableNodes(UaFolderNode rootNode) {
         addStatic(rootNode);
         addDynamic(rootNode);
+        addDevice(rootNode);
     }
 
     private void addStatic(UaFolderNode rootNode) {
@@ -246,6 +247,9 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
             dynamicFolder.addOrganizes(node);
         }
     }
+
+
+
 
     @Override
     public void onDataItemsCreated(List<DataItem> dataItems) {

@@ -11,7 +11,6 @@ public class App{
     public static void main(String[] args) {
         try {
             // get URL content
-
             String a = "http://gw-2ab0.sandbox.tek.sdu.dk/ssapi/zb/dev";
             URL url = new URL(a);
             URLConnection conn = url.openConnection();
