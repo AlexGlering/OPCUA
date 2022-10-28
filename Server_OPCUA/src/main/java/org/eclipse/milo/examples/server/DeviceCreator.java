@@ -15,7 +15,7 @@ public class DeviceCreator extends Namespace {
     }
 
     //adding folder to root
-    private void addDevice(UaFolderNode rootNode) {
+    void addDevice(UaFolderNode rootNode) {
         String deviceName = "";
 
         //create folder note
@@ -50,7 +50,6 @@ public class DeviceCreator extends Namespace {
         getNodeManager().addNode(LogicalDeviceFolder);
         //adding folder to root
         deviceFolder.addOrganizes(LogicalDeviceFolder);
-
     }
 
     public void addNode(UaFolderNode logicalDeviceFolder){
