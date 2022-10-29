@@ -291,10 +291,10 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
         //adding folder to root
         rootNode.addOrganizes(deviceFolder);
 
-        addSubFolder(deviceFolder);
+        addLogicalDevice(deviceFolder);
     }
 
-    private void addSubFolder(UaFolderNode deviceFolder){
+    private void addLogicalDevice(UaFolderNode deviceFolder){
         String deviceName = "";
         String logicalDeviceName = "";
 
