@@ -275,7 +275,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
     //adding folder to root
     void addDevice(UaFolderNode rootNode) {
-        String deviceName = "device"; //DUMMY
+        String deviceName = "";
 
         //create folder note
         UaFolderNode deviceFolder = new UaFolderNode(
@@ -295,8 +295,8 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
     }
 
     private void addSubFolder(UaFolderNode deviceFolder){
-        String deviceName = "device"; //DUMMY
-        String logicalDeviceName = "ldevice"; //DUMMY
+        String deviceName = "";
+        String logicalDeviceName = "";
 
         //create folder note
         UaFolderNode LogicalDeviceFolder = new UaFolderNode(
@@ -318,11 +318,10 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
     public void addNode(UaFolderNode logicalDeviceFolder){
         {
             //data node name
-            String logicalDeviceName="ldevice"; //DUMMY
-            String deviceName = "device"; //DUMMY
-            String nodeName = "endpoint"; //DUMMY
-            NodeId typeId = Identifiers.Int32; //data node datatype
-            Variant variant = new Variant(0); //DUMMY
+            String logicalDeviceName="";
+            String deviceName = "";
+            String nodeName = "";
+            NodeId typeId = Identifiers.Int32; //data node datatype. Must be changed for each datanode
 
             //building node
             UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
@@ -339,17 +338,6 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                     .setDataType(typeId)
                     .setTypeDefinition(Identifiers.BaseDataVariableType)
                     .build();
-
-            //DUMMY
-            {node.setValue(new DataValue(variant));
-
-            node.getFilterChain().addLast(
-                    new AttributeLoggingFilter(),
-                    AttributeFilters.getValue(
-                            ctx ->
-                                    new DataValue(new Variant(random.nextInt(100)))
-                    )
-            );}
 
             //adding node to node manager and device folder
             getNodeManager().addNode(node);
