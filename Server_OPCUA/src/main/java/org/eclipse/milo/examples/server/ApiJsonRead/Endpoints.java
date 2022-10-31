@@ -2,11 +2,11 @@ package org.eclipse.milo.examples.server.ApiJsonRead;
 
 import com.google.gson.JsonArray;
 
-public class NicksfraekkeEndPoints {
+public class Endpoints {
     private final String key;
     private final JsonArray endpoints;
 
-    public NicksfraekkeEndPoints(String key, JsonArray endpoints){
+    public Endpoints(String key, JsonArray endpoints){
         this.key = key;
         this.endpoints = endpoints;
     }

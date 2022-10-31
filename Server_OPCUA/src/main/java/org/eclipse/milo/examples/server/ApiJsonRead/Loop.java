@@ -4,12 +4,12 @@ import com.google.gson.JsonElement;
 
 import java.util.Map;
 
-public class NicksCreamCheese extends NicksSecretSauce{
+public class Loop extends Print {
     //eksempel på print
-    public static void start(NicksFraekkeDevice[] devices){
-        for(NicksFraekkeDevice d: devices){
+    public static void start(Device[] devices){
+        for(Device d: devices){
             print(d.specialID());
-            for (NicksfraekkeEndPoints n: d.getNicksfraekkeEndPoints()){
+            for (Endpoints n: d.getNicksfraekkeEndPoints()){
                 print("     "+n.getKey());
                 for (JsonElement j: n.getEndpoints()){
                     for(Map.Entry<String, JsonElement> k :j.getAsJsonObject().entrySet()){

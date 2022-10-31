@@ -2,13 +2,13 @@ package org.eclipse.milo.examples.server.ApiJsonRead;
 
 import java.util.ArrayList;
 
-public class NicksFraekkeDevice extends NicksSecretGsonSauce {
+public class Device extends Gson {
     private final int id;
     private final String defaultName;
     private Boolean onlineStatus;
-    ArrayList<NicksfraekkeEndPoints> nicksfraekkeEndPoints;
+    ArrayList<Endpoints> nicksfraekkeEndPoints;
 
-    public NicksFraekkeDevice(int id, String defaultName, Boolean onlineStatus){
+    public Device(int id, String defaultName, Boolean onlineStatus){
         this.id = id;
         this.defaultName = defaultName;
         this.onlineStatus = onlineStatus;
@@ -34,20 +34,20 @@ public class NicksFraekkeDevice extends NicksSecretGsonSauce {
         return onlineStatus;
     }
 
-    public ArrayList<NicksfraekkeEndPoints> getNicksfraekkeEndPoints(){
+    public ArrayList<Endpoints> getNicksfraekkeEndPoints(){
         return nicksfraekkeEndPoints;
     }
 
     public ArrayList<String> getKeys(){
         ArrayList<String> keyValue = new ArrayList<>();
-        for (NicksfraekkeEndPoints i: getNicksfraekkeEndPoints()){
+        for (Endpoints i: getNicksfraekkeEndPoints()){
             keyValue.add(i.getKey());
         }
         return keyValue;
     }
 
-    public NicksfraekkeEndPoints searchWithKey(String k){
-        for (NicksfraekkeEndPoints i: getNicksfraekkeEndPoints()){
+    public Endpoints searchWithKey(String k){
+        for (Endpoints i: getNicksfraekkeEndPoints()){
             if(i.getKey().equals(k)){
                 return i;
             }
