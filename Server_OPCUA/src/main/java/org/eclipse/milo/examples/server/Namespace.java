@@ -13,9 +13,9 @@ package org.eclipse.milo.examples.server;
 import java.util.*;
 
 import com.google.gson.JsonElement;
-import org.eclipse.milo.examples.server.ApiJsonRead.NicksFraekkeApiCalling;
-import org.eclipse.milo.examples.server.ApiJsonRead.NicksFraekkeDevice;
-import org.eclipse.milo.examples.server.ApiJsonRead.NicksfraekkeEndPoints;
+import org.eclipse.milo.examples.server.ApiJsonRead.ApiCall;
+import org.eclipse.milo.examples.server.ApiJsonRead.Device;
+import org.eclipse.milo.examples.server.ApiJsonRead.Endpoints;
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.server.Lifecycle;
@@ -28,7 +28,6 @@ import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.ServerTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.filters.AttributeFilters;
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
@@ -44,7 +43,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.eclipse.milo.examples.server.ApiJsonRead.NicksSecretSauce.print;
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
@@ -175,7 +173,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
         addStatic(rootNode);
         addDynamic(rootNode);
         //addDevice(rootNode);
-        NicksFraekkeDevice[] devices = NicksFraekkeApiCalling.requestIdsConnected("http://gw-2ab0.sandbox.tek.sdu.dk/ssapi/zb/dev");
+        Device[] devices = ApiCall.requestIdsConnected("http://gw-2ab0.sandbox.tek.sdu.dk/ssapi/zb/dev");
         folderLoop(devices,rootNode);
 
     }
@@ -346,8 +344,8 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
             logicalDeviceFolder.addOrganizes(node);
         }
     }
-    public void folderLoop(NicksFraekkeDevice[] devices, UaFolderNode root){
-        for(NicksFraekkeDevice d: devices){
+    public void folderLoop(Device[] devices, UaFolderNode root){
+        for(Device d: devices){
             //opret mappe her per device via specialID
             //addDevice(root, d.specialID());
             UaFolderNode deviceFolder = new UaFolderNode(getNodeContext(),
@@ -356,8 +354,8 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                     LocalizedText.english(""+d.specialID()));
             getNodeManager().addNode(deviceFolder);
             root.addOrganizes(deviceFolder);
-            
-            for (NicksfraekkeEndPoints n: d.getNicksfraekkeEndPoints()) {
+
+            for (Endpoints n: d.getNicksfraekkeEndPoints()) {
                 UaFolderNode logicalFolder = new UaFolderNode(getNodeContext(),
                         newNodeId("ICPS/"+d.specialID()+"/"+n.getKey()),
                         newQualifiedName(""+n.getKey()  ),

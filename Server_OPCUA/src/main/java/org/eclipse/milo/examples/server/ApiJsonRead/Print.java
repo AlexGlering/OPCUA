@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class NicksSecretSauce {
+public class Print {
     public static void print(Object i){
         System.out.println(i.toString());
     }
