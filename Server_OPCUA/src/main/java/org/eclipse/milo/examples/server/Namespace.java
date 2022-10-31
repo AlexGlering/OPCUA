@@ -10,10 +10,12 @@
 
 package org.eclipse.milo.examples.server;
 
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
+import com.google.gson.JsonElement;
+import org.eclipse.milo.examples.server.ApiJsonRead.NicksFraekkeApiCalling;
+import org.eclipse.milo.examples.server.ApiJsonRead.NicksFraekkeDevice;
+import org.eclipse.milo.examples.server.ApiJsonRead.NicksfraekkeEndPoints;
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.server.Lifecycle;
@@ -26,6 +28,7 @@ import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.ServerTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.filters.AttributeFilters;
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
@@ -41,6 +44,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.eclipse.milo.examples.server.ApiJsonRead.NicksSecretSauce.print;
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
@@ -61,7 +65,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
     private final SubscriptionModel subscriptionModel;
 
-    Namespace(OpcUaServer server) {
+    public Namespace(OpcUaServer server) {
         super(server, NAMESPACE_URI);
 
         subscriptionModel = new SubscriptionModel(server, this);
@@ -170,7 +174,9 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
     private void addVariableNodes(UaFolderNode rootNode) {
         addStatic(rootNode);
         addDynamic(rootNode);
-        addDevice(rootNode);
+        //addDevice(rootNode);
+        NicksFraekkeDevice[] devices = NicksFraekkeApiCalling.requestIdsConnected("http://gw-2ab0.sandbox.tek.sdu.dk/ssapi/zb/dev");
+        folderLoop(devices,rootNode);
 
     }
 
@@ -274,8 +280,8 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
     //CREATING THE TREE STRUCTURE
 
     //adding folder to root
-    void addDevice(UaFolderNode rootNode) {
-        String deviceName = "";
+    void addDevice(UaFolderNode rootNode, String deviceName) {
+        //String deviceName = "TEST DEVICE";
 
         //create folder note
         UaFolderNode deviceFolder = new UaFolderNode(
@@ -290,13 +296,11 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
         getNodeManager().addNode(deviceFolder);
         //adding folder to root
         rootNode.addOrganizes(deviceFolder);
-
-        addLogicalDevice(deviceFolder);
     }
 
     private void addLogicalDevice(UaFolderNode deviceFolder){
         String deviceName = "";
-        String logicalDeviceName = "";
+        String logicalDeviceName = "TEST FOLDER";
 
         //create folder note
         UaFolderNode LogicalDeviceFolder = new UaFolderNode(
@@ -311,17 +315,15 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
         getNodeManager().addNode(LogicalDeviceFolder);
         //adding folder to root
         deviceFolder.addOrganizes(LogicalDeviceFolder);
-
-        addNode(LogicalDeviceFolder);
     }
 
-    public void addNode(UaFolderNode logicalDeviceFolder){
+    public void addNode(UaFolderNode logicalDeviceFolder, String nodeName,String logicalDeviceName, String deviceName, NodeId typeId){
         {
             //data node name
-            String logicalDeviceName="";
-            String deviceName = "";
-            String nodeName = "";
-            NodeId typeId = Identifiers.Int32; //data node datatype. Must be changed for each datanode
+            //String logicalDeviceName="";
+            //String deviceName = "";
+            //String nodeName = "";
+            //NodeId typeId = Identifiers.Int32; //data node datatype. Must be changed for each datanode
 
             //building node
             UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
@@ -342,6 +344,33 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
             //adding node to node manager and device folder
             getNodeManager().addNode(node);
             logicalDeviceFolder.addOrganizes(node);
+        }
+    }
+    public void folderLoop(NicksFraekkeDevice[] devices, UaFolderNode root){
+        for(NicksFraekkeDevice d: devices){
+            //opret mappe her per device via specialID
+            //addDevice(root, d.specialID());
+            UaFolderNode deviceFolder = new UaFolderNode(getNodeContext(),
+                    newNodeId("ICPS/"+d.specialID()),
+                    newQualifiedName(""+d.specialID()),
+                    LocalizedText.english(""+d.specialID()));
+            getNodeManager().addNode(deviceFolder);
+            root.addOrganizes(deviceFolder);
+            
+            for (NicksfraekkeEndPoints n: d.getNicksfraekkeEndPoints()) {
+                UaFolderNode logicalFolder = new UaFolderNode(getNodeContext(),
+                        newNodeId("ICPS/"+d.specialID()+"/"+n.getKey()),
+                        newQualifiedName(""+n.getKey()  ),
+                        LocalizedText.english(""+n.getKey()));
+                getNodeManager().addNode(logicalFolder);
+                deviceFolder.addOrganizes(logicalFolder);
+
+                for (JsonElement j : n.getEndpoints()) {
+                    for (Map.Entry<String, JsonElement> k : j.getAsJsonObject().entrySet()) {
+                        addNode(logicalFolder,k.getKey(),n.getKey(),d.specialID(), Identifiers.Int32);
+                    }
+                }
+            }
         }
     }
 }
