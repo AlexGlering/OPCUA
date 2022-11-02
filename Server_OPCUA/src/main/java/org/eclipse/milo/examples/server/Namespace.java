@@ -381,7 +381,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
             try{
                 double i = Double.parseDouble(s);
                 Double.class.getDeclaredConstructor(double.class).newInstance(i);
-                return Integer.class;
+                return Double.class;
             }catch (NumberFormatException | NullPointerException e){
                 //e.printStackTrace();
             }
