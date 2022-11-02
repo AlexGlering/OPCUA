@@ -356,7 +356,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
             getNodeManager().addNode(deviceFolder);
             root.addOrganizes(deviceFolder);
 
-            for (Endpoints n: d.getNicksfraekkeEndPoints()) {
+            for (Endpoints n : d.getNicksfraekkeEndPoints()) {
                 UaFolderNode logicalFolder = new UaFolderNode(getNodeContext(),
                         newNodeId("ICPS/"+d.specialID()+"/"+n.getKey()),
                         newQualifiedName(""+n.getKey()  ),
@@ -366,11 +366,19 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
                 for (JsonElement j : n.getEndpoints()) {
                     for (Map.Entry<String, JsonElement> k : j.getAsJsonObject().entrySet()) {
-                        addNode(logicalFolder,k.getKey(),n.getKey(),d.specialID(), getType(k.getValue().getAsString()));
+                        UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
+                                .setNodeId(newNodeId(logicalFolder.getNodeId() + k.getKey()))
+                                .setAccessLevel(AccessLevel.READ_WRITE)
+                                .setBrowseName(newQualifiedName(logicalFolder.getNodeId() + k.getKey()))
+                                .setDisplayName(LocalizedText.english(logicalFolder.getNodeId() + k.getKey()))
+                                .setDataType(getType(k.getValue().getAsString()))
+                                .setTypeDefinition(Identifiers.BaseDataVariableType)
+                                .build();
+                        logicalFolder.addComponent(node);
+                        getNodeManager().addNode(node);
+                        logicalFolder.addOrganizes(node);
                     }
                 }
-
-
             }
         }
     }
