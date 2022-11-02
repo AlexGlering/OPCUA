@@ -383,14 +383,14 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                 Double.class.getDeclaredConstructor(double.class).newInstance(i);
                 return Integer.class;
             }catch (NumberFormatException | NullPointerException e){
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             try{
                 int d = Integer.parseInt(s);
                 Integer.class.getDeclaredConstructor(int.class).newInstance(d);
                 return Integer.class;
             }catch (NumberFormatException | NullPointerException e){
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             return String.class;
 
