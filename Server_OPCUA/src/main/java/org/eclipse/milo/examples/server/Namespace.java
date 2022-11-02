@@ -371,7 +371,8 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                                 .setAccessLevel(AccessLevel.READ_WRITE)
                                 .setBrowseName(newQualifiedName(logicalFolder.getNodeId() + k.getKey()))
                                 .setDisplayName(LocalizedText.english(logicalFolder.getNodeId() + k.getKey()))
-                                .setDataType(getType(k.getValue().getAsString()))
+                                //.setDataType(getType(k.getValue().getAsString()))
+                                .setDataType(identifier(k.getValue().getAsString())) //NOT WORKING, NEED typeID from json
                                 .setTypeDefinition(Identifiers.BaseDataVariableType)
                                 .build();
                         logicalFolder.addComponent(node);
