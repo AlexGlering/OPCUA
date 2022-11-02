@@ -10,9 +10,11 @@
 
 package org.eclipse.milo.examples.server;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import com.google.gson.JsonElement;
+import com.sun.jdi.IntegerType;
 import org.eclipse.milo.examples.server.ApiJsonRead.ApiCall;
 import org.eclipse.milo.examples.server.ApiJsonRead.Device;
 import org.eclipse.milo.examples.server.ApiJsonRead.Endpoints;
@@ -368,7 +370,35 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                         addNode(logicalFolder,k.getKey(),n.getKey(),d.specialID(), Identifiers.Int32);
                     }
                 }
+
+
             }
         }
+    }
+
+    public Class<?> getType(String s){
+        try{
+            try{
+                double i = Double.parseDouble(s);
+                Double.class.getDeclaredConstructor(double.class).newInstance(i);
+                return Integer.class;
+            }catch (NumberFormatException | NullPointerException e){
+                e.printStackTrace();
+            }
+            try{
+                int d = Integer.parseInt(s);
+                Integer.class.getDeclaredConstructor(int.class).newInstance(d);
+                return Integer.class;
+            }catch (NumberFormatException | NullPointerException e){
+                e.printStackTrace();
+            }
+            return String.class;
+
+        }catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex){
+            System.out.println("Unable to convert string " + s + " to either String, double or int");
+            ex.printStackTrace();
+        }
+
+        return s.getClass();
     }
 }
