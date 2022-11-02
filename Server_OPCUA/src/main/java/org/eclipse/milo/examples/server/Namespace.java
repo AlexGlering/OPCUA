@@ -398,4 +398,27 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
         }
         return Identifiers.String;
     }
+
+    public NodeId identifier(String typeID){
+        NodeId nodeId = null;
+        switch (typeID){
+            case "boolean":
+                nodeId = Identifiers.Boolean;
+                break;
+            case "double":
+                nodeId = Identifiers.Double;
+                break;
+            case "string":
+                nodeId = Identifiers.String;
+                break;
+            case "signed_integer":
+                nodeId = Identifiers.Int32;
+                break;
+            case "integer":
+                nodeId = Identifiers.Integer;
+                break;
+        }
+        return nodeId;
+    }
+
 }
