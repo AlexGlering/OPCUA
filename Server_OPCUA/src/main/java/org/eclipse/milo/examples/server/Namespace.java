@@ -14,7 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import com.google.gson.JsonElement;
-import com.sun.jdi.IntegerType;
 import org.eclipse.milo.examples.server.ApiJsonRead.ApiCall;
 import org.eclipse.milo.examples.server.ApiJsonRead.Device;
 import org.eclipse.milo.examples.server.ApiJsonRead.Endpoints;
@@ -367,7 +366,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
                 for (JsonElement j : n.getEndpoints()) {
                     for (Map.Entry<String, JsonElement> k : j.getAsJsonObject().entrySet()) {
-                        addNode(logicalFolder,k.getKey(),n.getKey(),d.specialID(), Identifiers.Int32);
+                        addNode(logicalFolder,k.getKey(),n.getKey(),d.specialID(), getType(k.getValue().getAsString()));
                     }
                 }
 
@@ -376,29 +375,19 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
         }
     }
 
-    public Class<?> getType(String s){
+    public NodeId getType(String s){
         try{
-            try{
-                double i = Double.parseDouble(s);
-                Double.class.getDeclaredConstructor(double.class).newInstance(i);
-                return Double.class;
-            }catch (NumberFormatException | NullPointerException e){
-                //e.printStackTrace();
-            }
-            try{
-                int d = Integer.parseInt(s);
-                Integer.class.getDeclaredConstructor(int.class).newInstance(d);
-                return Integer.class;
-            }catch (NumberFormatException | NullPointerException e){
-                //e.printStackTrace();
-            }
-            return String.class;
-
-        }catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex){
-            System.out.println("Unable to convert string " + s + " to either String, double or int");
-            ex.printStackTrace();
+            Double.parseDouble(s);
+            return Identifiers.Double;
+        }catch (NumberFormatException | NullPointerException e){
+            //e.printStackTrace();
         }
-
-        return s.getClass();
+        try{
+            Integer.parseInt(s);
+            return Identifiers.Int32;
+        }catch (NumberFormatException | NullPointerException e){
+            //e.printStackTrace();
+        }
+        return Identifiers.String;
     }
 }
