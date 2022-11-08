@@ -13,6 +13,7 @@ package org.eclipse.milo.examples.server;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import org.eclipse.milo.examples.server.ApiJsonRead.ApiCall;
 import org.eclipse.milo.examples.server.ApiJsonRead.Device;
@@ -372,63 +373,78 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                                 .setNodeId(newNodeId(logicalFolder.getNodeId() + k.getKey()))
                                 //.setNodeId(identifier(k.getValue().getAsString()))
                                 .setAccessLevel(AccessLevel.READ_WRITE)
-                                .setBrowseName(newQualifiedName(logicalFolder.getNodeId() + k.getKey()))
+                                .setUserAccessLevel(getUserAccessLevel("n"))//FIND "access" here
+                                .setBrowseName(newQualifiedName(k.getKey()))
                                 .setDisplayName(LocalizedText.english(k.getKey()))
                                 //.setDataType(getType(k.getValue().getAsString()))
-                                //.setDataType(identifier(k.getValue().getAsString())) //NOT WORKING, NEED typeID from json
-                                .setTypeDefinition(Identifiers.BaseDataVariableType)
                                 .setValue(new DataValue(new Variant(k.getValue().getAsString())))
+                                .setDataType(getType(k.getValue().toString()))//NOT WORKING, NEED typeID from json
+                                .setTypeDefinition(getType(k.getValue().toString()))
                                 .build();
                         logicalFolder.addComponent(node);
                         getNodeManager().addNode(node);
                         logicalFolder.addOrganizes(node);
-                        System.out.println(k.getValue().getAsString());
+                        //System.out.println(k.getValue().getAsString());
                     }
                 }
             }
         }
     }
+    public ImmutableSet<AccessLevel> getUserAccessLevel(String s){
+        switch (s){
+            case "w" -> {
+                return AccessLevel.READ_WRITE;
+            }
+            default -> {
+                return AccessLevel.READ_ONLY;
+            }
+        }
+    }
 
     public NodeId getType(String s){
+        //System.out.println("Getting type from string " + s);
         try{
             Double.parseDouble(s);
+            //System.out.println("\treturning type DOUBLE-" + Identifiers.Double);
             return Identifiers.Double;
         }catch (NumberFormatException | NullPointerException e){
             //e.printStackTrace();
         }
         try{
             Integer.parseInt(s);
+            //System.out.println("\treturning type INT-" + Identifiers.Int32);
             return Identifiers.Int32;
         }catch (NumberFormatException | NullPointerException e){
             //e.printStackTrace();
         }
+        //System.out.println("\tReturning type string");
         return Identifiers.String;
     }
 
-    public NodeId identifier(String typeID){
-        NodeId nodeId = null;
-        switch (typeID){
-            case "boolean":
-                nodeId = Identifiers.Boolean;
-                break;
-            case "double":
-                nodeId = Identifiers.Double;
-                break;
-            case "string":
-                nodeId = Identifiers.String;
-                break;
-            case "signed_integer":
-                nodeId = Identifiers.Int32;
-                break;
-            case "integer":
-                nodeId = Identifiers.Integer;
-                break;
-
-            default:
-                nodeId = Identifiers.String;
-
-        }
-        return Identifiers.String;
-    }
+    //public NodeId identifier(String typeID){
+    //    NodeId nodeId = null;
+    //    switch (typeID){
+    //        case "boolean":
+    //            nodeId = Identifiers.Boolean;
+    //            break;
+    //        case "double":
+    //            nodeId = Identifiers.Double;
+    //            break;
+    //        case "string":
+    //            nodeId = Identifiers.String;
+    //            break;
+    //        case "signed_integer":
+    //            nodeId = Identifiers.Int32;
+    //            break;
+    //        case "integer":
+    //            nodeId = Identifiers.Integer;
+    //            break;
+    //
+    //        default:
+    //            nodeId = Identifiers.String;
+    //
+    //    }
+    //    return Identifiers.String;
+    //}
 
 }
