@@ -330,7 +330,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                     //setting server access level
                     .setAccessLevel(AccessLevel.READ_WRITE)
                     //setting user access level
-                    .setUserAccessLevel(AccessLevel.READ_ONLY)
+                    .setUserAccessLevel(AccessLevel.READ_WRITE)
                     //setting the browser name
                     .setBrowseName(newQualifiedName(nodeName))
                     //setting display name
@@ -366,18 +366,23 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
                 for (JsonElement j : n.getEndpoints()) {
                     for (Map.Entry<String, JsonElement> k : j.getAsJsonObject().entrySet()) {
+
+
                         UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
                                 .setNodeId(newNodeId(logicalFolder.getNodeId() + k.getKey()))
+                                //.setNodeId(identifier(k.getValue().getAsString()))
                                 .setAccessLevel(AccessLevel.READ_WRITE)
                                 .setBrowseName(newQualifiedName(logicalFolder.getNodeId() + k.getKey()))
-                                .setDisplayName(LocalizedText.english(logicalFolder.getNodeId() + k.getKey()))
+                                .setDisplayName(LocalizedText.english(k.getKey()))
                                 //.setDataType(getType(k.getValue().getAsString()))
-                                .setDataType(identifier(k.getValue().getAsString())) //NOT WORKING, NEED typeID from json
+                                //.setDataType(identifier(k.getValue().getAsString())) //NOT WORKING, NEED typeID from json
                                 .setTypeDefinition(Identifiers.BaseDataVariableType)
+                                .setValue(new DataValue(new Variant(k.getValue().getAsString())))
                                 .build();
                         logicalFolder.addComponent(node);
                         getNodeManager().addNode(node);
                         logicalFolder.addOrganizes(node);
+                        System.out.println(k.getValue().getAsString());
                     }
                 }
             }
@@ -418,8 +423,12 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
             case "integer":
                 nodeId = Identifiers.Integer;
                 break;
+
+            default:
+                nodeId = Identifiers.String;
+
         }
-        return nodeId;
+        return Identifiers.String;
     }
 
 }
