@@ -10,7 +10,12 @@
 
 package org.eclipse.milo.examples.server;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
 
 import com.google.common.collect.ImmutableSet;
@@ -20,6 +25,8 @@ import org.eclipse.milo.examples.server.ApiJsonRead.Device;
 import org.eclipse.milo.examples.server.ApiJsonRead.Endpoints;
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
 import org.eclipse.milo.opcua.sdk.core.Reference;
+import org.eclipse.milo.opcua.sdk.core.nodes.Node;
+import org.eclipse.milo.opcua.sdk.core.nodes.VariableNode;
 import org.eclipse.milo.opcua.sdk.server.Lifecycle;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.DataItem;
@@ -31,6 +38,7 @@ import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.ServerTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.filters.AttributeFilterContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.filters.AttributeFilters;
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
@@ -379,18 +387,31 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                             LocalizedText.english(asd));
                     getNodeManager().addNode(endpoints);
                     logicalFolder.addOrganizes(endpoints);
-
                     for (Map.Entry<String, JsonElement> k : j.getAsJsonObject().entrySet()) {
 
+                        ImmutableSet<AccessLevel> accessLevelC = getUserAccessLevel(j.getAsJsonObject().get("access").toString());
+                        Object typeID = convertToDataType(k.getValue().getAsString());
 
                         UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
                                 .setNodeId(newNodeId(endpoints.getNodeId() + k.getKey()))
-                                .setAccessLevel(AccessLevel.READ_WRITE)
-                                .setUserAccessLevel(getUserAccessLevel("n"))//FIND "access" here
+                                .setAccessLevel(accessLevelC)
+                                .setUserAccessLevel(accessLevelC)//FIND "access" here
                                 .setBrowseName(newQualifiedName(k.getKey()))
                                 .setDisplayName(LocalizedText.english(k.getKey()))
                                 .setValue(new DataValue(new Variant(convertToDataType(k.getValue().getAsString()))))
                                 .build();
+
+                        if(!accessLevelC.equals(AccessLevel.READ_ONLY)){
+                            String finalAsd = asd;
+                            node.getFilterChain().addLast(
+                                    new AttributeLoggingFilter(AttributeId.Value::equals),
+                                    AttributeFilters.setValue((ctx, value) -> yessir(d.getId(), value, n.getKey(), finalAsd))
+
+                            );
+
+                            node.getFilterChain().addLast(new AttributeLoggingFilter(AttributeId.Value::equals));
+                        }
+
                         endpoints.addComponent(node);
                         getNodeManager().addNode(node);
                         endpoints.addOrganizes(node);
@@ -400,11 +421,33 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
         }
     }
 
+    public void yessir(int id, DataValue dat, String key, String datapoint){
+        String value = dat.getValue().toString().split("=")[1];
+        String call = String.format("http://gw-2ab0.sandbox.tek.sdu.dk/ssapi/zb/dev/%s/ldev/%s/data/%s/",Integer.toString(id),key,datapoint);
 
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(call))
+                .build();
+
+        request = HttpRequest.newBuilder()
+                .uri(URI.create(call))
+                .header("accept", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString("{\"value\": "+value))
+                .build();
+        HttpClient httpClient = HttpClient.newHttpClient();
+        try{
+            httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        }catch (Exception e){
+
+        }
+    }
 
     public ImmutableSet<AccessLevel> getUserAccessLevel(String s){
         switch (s){
-            case "w" -> {
+            case "\"w\"" -> {
+                return AccessLevel.WRITE_ONLY;
+            }
+            case "\"rw\"" ->{
                 return AccessLevel.READ_WRITE;
             }
             default -> {
@@ -438,5 +481,4 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
         return s;
     }
-
 }
