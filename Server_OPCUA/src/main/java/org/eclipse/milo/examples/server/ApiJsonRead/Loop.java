@@ -1,6 +1,7 @@
 package org.eclipse.milo.examples.server.ApiJsonRead;
 
 import com.google.gson.JsonElement;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
 import java.util.Map;
 

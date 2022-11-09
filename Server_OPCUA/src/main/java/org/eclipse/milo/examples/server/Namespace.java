@@ -81,7 +81,6 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
             public void startup() {
                 startBogusEventNotifier();
             }
-
             @Override
             public void shutdown() {
                 try {
@@ -93,6 +92,10 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                 }
             }
         });
+    }
+
+    public void hehe(){
+        createAndAddNodes();
     }
 
     private void createAndAddNodes() {
@@ -172,8 +175,6 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
     }
 
     private void addVariableNodes(UaFolderNode rootNode) {
-        addStatic(rootNode);
-        addDynamic(rootNode);
         //addDevice(rootNode);
         Device[] devices = ApiCall.requestIdsConnected("http://gw-2ab0.sandbox.tek.sdu.dk/ssapi/zb/dev");
         folderLoop(devices,rootNode);
@@ -181,6 +182,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
     }
 
     private void addStatic(UaFolderNode rootNode) {
+        //ref1
         UaFolderNode scalarTypesFolder = new UaFolderNode(
             getNodeContext(),
             newNodeId("ICPS/Static"),
@@ -347,40 +349,51 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
         }
     }
     public void folderLoop(Device[] devices, UaFolderNode root){
+        String path;
         for(Device d: devices){
-            //opret mappe her per device via specialID
-            //addDevice(root, d.specialID());
+            path = "ICPS/"+d.specialID();
             UaFolderNode deviceFolder = new UaFolderNode(getNodeContext(),
-                    newNodeId("ICPS/"+d.specialID()),
+                    newNodeId(path),
                     newQualifiedName(""+d.specialID()),
                     LocalizedText.english(""+d.specialID()));
             getNodeManager().addNode(deviceFolder);
             root.addOrganizes(deviceFolder);
 
             for (Endpoints n : d.getNicksfraekkeEndPoints()) {
+                path+= "/"+n.getKey();
                 UaFolderNode logicalFolder = new UaFolderNode(getNodeContext(),
-                        newNodeId("ICPS/"+d.specialID()+"/"+n.getKey()),
+                        newNodeId(path),
                         newQualifiedName(""+n.getKey()  ),
                         LocalizedText.english(""+n.getKey()));
                 getNodeManager().addNode(logicalFolder);
                 deviceFolder.addOrganizes(logicalFolder);
 
+
                 for (JsonElement j : n.getEndpoints()) {
+                    String asd = j.getAsJsonObject().get("key").toString();
+                    asd = asd.substring(1,asd.length()-1);
+                    path+= "/"+asd;
+                    UaFolderNode endpoints = new UaFolderNode(getNodeContext(),
+                            newNodeId(path),
+                            newQualifiedName(asd  ),
+                            LocalizedText.english(asd));
+                    getNodeManager().addNode(endpoints);
+                    logicalFolder.addOrganizes(endpoints);
 
                     for (Map.Entry<String, JsonElement> k : j.getAsJsonObject().entrySet()) {
 
 
                         UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
-                                .setNodeId(newNodeId(logicalFolder.getNodeId() + k.getKey()))
+                                .setNodeId(newNodeId(endpoints.getNodeId() + k.getKey()))
                                 .setAccessLevel(AccessLevel.READ_WRITE)
                                 .setUserAccessLevel(getUserAccessLevel("n"))//FIND "access" here
                                 .setBrowseName(newQualifiedName(k.getKey()))
                                 .setDisplayName(LocalizedText.english(k.getKey()))
                                 .setValue(new DataValue(new Variant(convertToDataType(k.getValue().getAsString()))))
                                 .build();
-                        logicalFolder.addComponent(node);
+                        endpoints.addComponent(node);
                         getNodeManager().addNode(node);
-                        logicalFolder.addOrganizes(node);
+                        endpoints.addOrganizes(node);
                     }
                 }
             }

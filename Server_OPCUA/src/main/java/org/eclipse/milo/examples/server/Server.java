@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.eclipse.milo.examples.server.ApiJsonRead.ApiCall;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
@@ -59,6 +60,7 @@ public class Server {
 
         while(true) {
             sleep(1000); // sleep 1s
+            server.namespace.hehe();
         }
     }
 
