@@ -376,7 +376,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                                 .setUserAccessLevel(getUserAccessLevel("n"))//FIND "access" here
                                 .setBrowseName(newQualifiedName(k.getKey()))
                                 .setDisplayName(LocalizedText.english(k.getKey()))
-                                .setValue(new DataValue(new Variant(convertTodataType(k.getValue().getAsString()))))
+                                .setValue(new DataValue(new Variant(convertToDataType(k.getValue().getAsString()))))
                                 .build();
                         logicalFolder.addComponent(node);
                         getNodeManager().addNode(node);
@@ -400,7 +400,8 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
         }
     }
 
-    private Object convertTodataType(String s){
+
+    private Object convertToDataType(String s){
         try{
             double output = Double.parseDouble(s);
             return output;
