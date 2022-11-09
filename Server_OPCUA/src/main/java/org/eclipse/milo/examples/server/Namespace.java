@@ -366,30 +366,29 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
                 deviceFolder.addOrganizes(logicalFolder);
 
                 for (JsonElement j : n.getEndpoints()) {
+
                     for (Map.Entry<String, JsonElement> k : j.getAsJsonObject().entrySet()) {
 
 
                         UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
                                 .setNodeId(newNodeId(logicalFolder.getNodeId() + k.getKey()))
-                                //.setNodeId(identifier(k.getValue().getAsString()))
                                 .setAccessLevel(AccessLevel.READ_WRITE)
                                 .setUserAccessLevel(getUserAccessLevel("n"))//FIND "access" here
                                 .setBrowseName(newQualifiedName(k.getKey()))
                                 .setDisplayName(LocalizedText.english(k.getKey()))
-                                //.setDataType(getType(k.getValue().getAsString()))
-                                .setValue(new DataValue(new Variant(k.getValue().getAsString())))
-                                .setDataType(getType(k.getValue().toString()))//NOT WORKING, NEED typeID from json
-                                .setTypeDefinition(getType(k.getValue().toString()))
+                                .setValue(new DataValue(new Variant(convertTodataType(k.getValue().getAsString()))))
                                 .build();
                         logicalFolder.addComponent(node);
                         getNodeManager().addNode(node);
                         logicalFolder.addOrganizes(node);
-                        //System.out.println(k.getValue().getAsString());
                     }
                 }
             }
         }
     }
+
+
+
     public ImmutableSet<AccessLevel> getUserAccessLevel(String s){
         switch (s){
             case "w" -> {
@@ -401,50 +400,29 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
         }
     }
 
-    public NodeId getType(String s){
-        //System.out.println("Getting type from string " + s);
+    private Object convertTodataType(String s){
         try{
-            Double.parseDouble(s);
-            //System.out.println("\treturning type DOUBLE-" + Identifiers.Double);
-            return Identifiers.Double;
-        }catch (NumberFormatException | NullPointerException e){
-            //e.printStackTrace();
-        }
-        try{
-            Integer.parseInt(s);
-            //System.out.println("\treturning type INT-" + Identifiers.Int32);
-            return Identifiers.Int32;
-        }catch (NumberFormatException | NullPointerException e){
-            //e.printStackTrace();
-        }
-        //System.out.println("\tReturning type string");
-        return Identifiers.String;
-    }
+            double output = Double.parseDouble(s);
+            return output;
+        }catch (NumberFormatException e){
 
-    //public NodeId identifier(String typeID){
-    //    NodeId nodeId = null;
-    //    switch (typeID){
-    //        case "boolean":
-    //            nodeId = Identifiers.Boolean;
-    //            break;
-    //        case "double":
-    //            nodeId = Identifiers.Double;
-    //            break;
-    //        case "string":
-    //            nodeId = Identifiers.String;
-    //            break;
-    //        case "signed_integer":
-    //            nodeId = Identifiers.Int32;
-    //            break;
-    //        case "integer":
-    //            nodeId = Identifiers.Integer;
-    //            break;
-    //
-    //        default:
-    //            nodeId = Identifiers.String;
-    //
-    //    }
-    //    return Identifiers.String;
-    //}
+        }
+        try{
+            int output = Integer.parseInt(s);
+            return output;
+        }catch (NumberFormatException e){
+
+        }
+        if(s == "true" || s == "false"){
+            try{
+                boolean output = Boolean.parseBoolean(s);
+                return output;
+            }catch (NumberFormatException e){
+
+            }
+        }
+
+        return s;
+    }
 
 }
